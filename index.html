@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>内部数据库</title>
+<style>
+body { font-family: Arial; max-width: 500px; margin: auto; }
+input, select, button { width: 100%; margin: 5px 0; padding: 8px; }
+.hidden { display: none; }
+</style>
+</head>
+<body>
+
+<h2>登录</h2>
+<div id="login">
+  <input id="user" placeholder="账号">
+  <input id="pass" type="password" placeholder="密码">
+  <button onclick="login()">登录</button>
+</div>
+
+<div id="app" class="hidden">
+  <h3>电话搜索</h3>
+  <input id="phone">
+  <button onclick="search()">搜索</button>
+
+  <div id="result"></div>
+  <div id="addForm" class="hidden">
+    <input id="name" placeholder="姓名">
+    <select id="gender">
+      <option>男</option>
+      <option>女</option>
+    </select>
+    <input id="nation" placeholder="国籍">
+    <input id="appname" placeholder="社交软件">
+    <input id="link" placeholder="社媒链接">
+    <button onclick="add()">添加</button>
+  </div>
+</div>
+
+<script>
+const API = "你的 Web App URL";
+let token = "";
+
+function call(fn, data) {
+  return fetch(API, {
+    method: "POST",
+    body: JSON.stringify({ fn, data })
+  }).then(r => r.json());
+}
+
+function login() {
+  call("login", {
+    username: user.value,
+    password: pass.value
+  }).then(r => {
+    if (!r.ok) return alert(r.msg);
+    token = r.token;
+    loginDiv.classList.add("hidden");
+    app.classList.remove("hidden");
+  });
+}
+
+function search() {
+  call("searchByPhone", { token, phone: phone.value })
+    .then(r => {
+      if (!r) {
+        result.innerHTML = "未找到";
+        addForm.classList.remove("hidden");
+      } else {
+        result.innerHTML = JSON.stringify(r);
+      }
+    });
+}
+
+function add() {
+  call("addRecord", {
+    token,
+    data: {
+      phone: phone.value,
+      name: name.value,
+      gender: gender.value,
+      nationality: nation.value,
+      social_app: appname.value,
+      social_link: link.value
+    }
+  }).then(() => alert("添加成功"));
+}
+</script>
+
+</body>
+</html>
